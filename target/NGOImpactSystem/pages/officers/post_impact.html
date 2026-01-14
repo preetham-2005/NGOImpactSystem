@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Post-Aid Impact - NGO Impact System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 30px;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        form {
+            background: white;
+            padding: 25px;
+            width: 420px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 18px;
+            width: 100%;
+            padding: 10px;
+            background-color: #8e44ad;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #732d91;
+        }
+
+        .back {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>📈 Post-Aid Impact Update</h2>
+
+<form action="../../PostAidImpactServlet" method="post">
+
+    <label>Beneficiary ID</label>
+    <input type="number" name="beneficiary_id" required>
+
+    <label>Income After Aid</label>
+    <input type="number" name="income_after" required>
+
+    <label>Employment Improved</label>
+    <select name="employed" required>
+        <option value="">-- Select --</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select>
+
+    <label>Still Struggling?</label>
+    <select name="struggling" required>
+        <option value="">-- Select --</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+    </select>
+
+    <button type="submit">Update Impact</button>
+
+</form>
+
+<div class="back">
+    <a href="officer_dashboard.html">⬅ Back to Dashboard</a>
+</div>
+
+</body>
+</html>

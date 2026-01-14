@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Beneficiary - NGO Impact System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 30px;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        form {
+            background: white;
+            padding: 25px;
+            width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .back {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h2>➕ Add Beneficiary</h2>
+
+<form action="../../AddBeneficiaryServlet" method="post">
+
+    <label>Beneficiary Name</label>
+    <input type="text" name="name" required>
+
+    <label>Region</label>
+    <select name="region_id" required>
+        <option value="">-- Select Region --</option>
+        <option value="1">Region A</option>
+        <option value="2">Region B</option>
+        <option value="3">Region C</option>
+    </select>
+
+    <label>Program</label>
+    <select name="program_id" required>
+        <option value="">-- Select Program --</option>
+        <option value="1">Education Sponsorship</option>
+        <option value="2">Medical Aid</option>
+        <option value="3">Food Distribution</option>
+        <option value="4">Skill Training</option>
+    </select>
+
+    <label>Income Before Aid</label>
+    <input type="number" name="income_before" required>
+
+    <label>Email</label>
+    <input type="email" name="email" required>
+
+    <button type="submit">Save Beneficiary</button>
+
+</form>
+
+<div class="back">
+    <a href="officer_dashboard.html">⬅ Back to Dashboard</a>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+    <display-name>NGO Impact System</display-name>
+
+    <!-- LOGIN SERVLET -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.ngo.servlet.LoginServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/LoginServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- LOGOUT -->
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.ngo.servlet.LogoutServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- ADD BENEFICIARY -->
+    <servlet>
+        <servlet-name>AddBeneficiaryServlet</servlet-name>
+        <servlet-class>com.ngo.servlet.AddBeneficiaryServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AddBeneficiaryServlet</servlet-name>
+        <url-pattern>/AddBeneficiaryServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- DISTRIBUTE AID -->
+    <servlet>
+        <servlet-name>DistributeAidServlet</servlet-name>
+        <servlet-class>com.ngo.servlet.DistributeAidServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DistributeAidServlet</servlet-name>
+        <url-pattern>/DistributeAidServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- POST AID IMPACT -->
+    <servlet>
+        <servlet-name>PostAidImpactServlet</servlet-name>
+        <servlet-class>com.ngo.servlet.PostAidImpactServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>PostAidImpactServlet</servlet-name>
+        <url-pattern>/PostAidImpactServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- DEFAULT PAGE -->
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

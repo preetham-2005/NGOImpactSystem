@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard - NGO Impact System</title>
+
+    <!-- ✅ Prevent back after logout -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link rel="stylesheet" href="../../css/style.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .card a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .card a:hover {
+            background-color: #2980b9;
+        }
+
+        .logout {
+            text-align: right;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+
+        .logout a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h2>Admin Dashboard</h2>
+
+    <div class="logout">
+        <!-- ✅ REAL LOGOUT -->
+        <a href="../../LogoutServlet" onclick="return confirm('Do you want to logout?')">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="card">
+        <h3>📊 View Reports</h3>
+        <p>View program-wise, region-wise and impact analysis reports.</p>
+        <a href="reports.jsp">View Reports</a>
+    </div>
+
+    <div class="card">
+        <h3>📁 Export Data</h3>
+        <p>Export beneficiary, aid distribution and impact data as CSV.</p>
+        <a href="export_data.jsp">Export CSV</a>
+    </div>
+
+    <div class="card">
+        <h3>📈 Analytics</h3>
+        <p>Analyze aid effectiveness using Python-based analytics.</p>
+        <a href="analytics.html">View Analytics</a>
+    </div>
+
+</div>
+
+</body>
+</html>
