@@ -1,16 +1,18 @@
 package com.ngo.servlet;
 
+import java.io.IOException;
+
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import java.io.IOException;
-
-import com.ngo.util.RedirectUtil; // ✅ Correct import
-
+@WebServlet("/LogoutServlet")
 public class LogoutServlet extends HttpServlet {
+
+    private static final long serialVersionUID = 1L;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -21,6 +23,6 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate();
         }
 
-        RedirectUtil.redirect(req, res, "/login.html");
+        res.sendRedirect(req.getContextPath() + "/login.html");
     }
 }

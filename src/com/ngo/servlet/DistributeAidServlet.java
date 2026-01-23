@@ -1,10 +1,12 @@
 package com.ngo.servlet;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
 
 import com.ngo.service.AidService;
@@ -12,6 +14,7 @@ import com.ngo.service.BeneficiaryService;
 import com.ngo.util.EmailUtil;
 import com.ngo.util.RedirectUtil;
 
+@WebServlet("/DistributeAidServlet")
 public class DistributeAidServlet extends HttpServlet {
 
     @Override
@@ -24,27 +27,32 @@ public class DistributeAidServlet extends HttpServlet {
             return;
         }
 
+        // ✅ Officer username from session (if you store it)
+        String requestedBy = (String) session.getAttribute("username");
+        if (requestedBy == null) requestedBy = "officer1"; // fallback
+
         int beneficiaryId = Integer.parseInt(req.getParameter("beneficiary_id"));
         String aidType = req.getParameter("aid_type");
         double amount = Double.parseDouble(req.getParameter("amount"));
-        String date = req.getParameter("date");
 
-        // ✅ Save distribution in DB
-        new AidService().distribute(beneficiaryId, aidType, amount, date);
+        // ✅ Instead of distributing directly, create PENDING request
+        new AidService().createAidRequest(beneficiaryId, aidType, amount, requestedBy);
 
-        // ✅ Fetch beneficiary email from DB (CORRECT WAY)
+        // ✅ Fetch beneficiary email from DB
         BeneficiaryService bs = new BeneficiaryService();
         String email = bs.getBeneficiaryEmail(beneficiaryId);
 
-        // ✅ Send email only if email exists
+        // ✅ Inform beneficiary: Request raised (not distributed yet)
         if (email != null && !email.trim().isEmpty()) {
-            String msg = "Hello,\n\nYour aid has been distributed successfully.\n\n" +
+
+            String msg = "Hello,\n\n" +
+                    "A new aid request has been submitted and is pending approval.\n\n" +
                     "Aid Type: " + aidType +
                     "\nAmount: " + amount +
-                    "\nDate: " + date +
-                    "\n\nThank you.\nNGO Impact System";
+                    "\nStatus: PENDING\n\n" +
+                    "Thank you.\nNGO Impact System";
 
-            EmailUtil.sendEmail(email, "Aid Distributed Successfully", msg);
+            EmailUtil.sendEmail(email, "Aid Request Submitted", msg);
         }
 
         RedirectUtil.redirect(req, res, "/pages/officers/officer_dashboard.html");

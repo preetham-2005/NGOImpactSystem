@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analytics - NGO Impact System</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h2 {
+      margin: 0;
+    }
+
+    .header .back-btn {
+      color: white;
+      text-decoration: none;
+      background: #3498db;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .header .back-btn:hover {
+      background: #2980b9;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: white;
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #2c3e50;
+    }
+
+    .card p {
+      font-size: 22px;
+      font-weight: bold;
+      margin: 10px 0 0 0;
+      color: #27ae60;
+    }
+
+    .analytics-section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+
+    h3 {
+      margin-top: 0;
+      color: #2c3e50;
+    }
+
+    canvas {
+      width: 100% !important;
+      max-height: 350px;
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table th, table td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    table th {
+      background: #ecf0f1;
+      color: #2c3e50;
+    }
+
+    .btn-group {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .btn:hover {
+      background: #2980b9;
+    }
+
+    .btn.green {
+      background: #27ae60;
+    }
+
+    .btn.green:hover {
+      background: #1e8b4b;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h2>📈 Analytics Dashboard</h2>
+    <a class="back-btn" href="admin_dashboard.html">⬅ Back</a>
+  </div>
+
+  <div class="container">
+
+    <div class="cards">
+      <div class="card">
+        <h3>Total Beneficiaries</h3>
+        <p id="totalBeneficiaries">0</p>
+      </div>
+
+      <div class="card">
+        <h3>Total Aid Distributed</h3>
+        <p id="totalAid">₹0</p>
+      </div>
+
+      <div class="card">
+        <h3>Employment Improved</h3>
+        <p id="employmentImproved">0%</p>
+      </div>
+
+      <div class="card">
+        <h3>Income Growth</h3>
+        <p id="incomeGrowth">0%</p>
+      </div>
+    </div>
+
+    <div class="analytics-section">
+      <h3>📊 Aid Distribution vs Impact</h3>
+      <canvas id="impactChart"></canvas>
+
+      <h3 style="margin-top:30px;">📋 Beneficiary Impact Summary</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Aid Type</th>
+            <th>Amount</th>
+            <th>Income After Aid</th>
+            <th>Employment</th>
+          </tr>
+        </thead>
+        <tbody id="impactTable"></tbody>
+      </table>
+
+      <div class="btn-group">
+        <button class="btn green" onclick="downloadCSV()">⬇ Download Report (CSV)</button>
+        <button class="btn" onclick="reloadData()">🔄 Reload Data</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  let data = [];
+  let chartInstance = null;
+
+  async function loadAnalytics() {
+    try {
+      const response = await fetch("../../AnalyticsServlet");
+
+      if (!response.ok) {
+        alert("❌ AnalyticsServlet error");
+        return;
+      }
+
+      // ✅ NEW: result is an OBJECT, not array
+      const result = await response.json();
+
+      // ✅ Total Beneficiaries (from beneficiaries table)
+      document.getElementById("totalBeneficiaries").innerText =
+        result.totalBeneficiaries ?? 0;
+
+      // ✅ Analytics rows
+      data = result.data || [];
+
+      if (data.length === 0) {
+        alert("⚠ No analytics data found");
+      }
+
+      // ✅ Total Aid Distributed
+      const totalAid = data.reduce((sum, x) => sum + (x.amount || 0), 0);
+      document.getElementById("totalAid").innerText = "₹" + totalAid;
+
+      // ✅ Employment Improved %
+      const employedCount =
+        data.filter(x => (x.employment || "").toLowerCase() === "yes").length;
+
+      document.getElementById("employmentImproved").innerText =
+        data.length > 0
+          ? Math.round((employedCount / data.length) * 100) + "%"
+          : "0%";
+
+      // ✅ Income Growth (basic calculation)
+      const avgIncome =
+        data.reduce((sum, x) => sum + (x.income || 0), 0) / (data.length || 1);
+
+      document.getElementById("incomeGrowth").innerText =
+        Math.round((avgIncome / 10000) * 100) + "%";
+
+      // ✅ Fill table
+      const table = document.getElementById("impactTable");
+      table.innerHTML = "";
+
+      data.forEach(x => {
+        table.innerHTML += `
+          <tr>
+            <td>${x.id}</td>
+            <td>${x.name}</td>
+            <td>${x.aid}</td>
+            <td>₹${x.amount}</td>
+            <td>₹${x.income}</td>
+            <td>${x.employment}</td>
+          </tr>
+        `;
+      });
+
+      // ✅ Chart
+      const labels = data.map(x => x.name);
+      const amounts = data.map(x => x.amount);
+      const incomes = data.map(x => x.income);
+
+      const ctx = document.getElementById("impactChart");
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: labels,
+          datasets: [
+            { label: "Aid Distributed", data: amounts },
+            { label: "Income After Aid", data: incomes }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { position: "top" } }
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("❌ Error loading analytics");
+    }
+  }
+
+  loadAnalytics();
+</script>
+
+
+</body>
+</html>

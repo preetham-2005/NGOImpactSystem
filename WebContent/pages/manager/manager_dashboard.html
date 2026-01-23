@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard - NGO Impact System</title>
+
+    <style>
+        body { font-family: Arial; margin:0; background:#f5f5f5; }
+
+        header {
+            background:#2c3e50;
+            color:white;
+            padding:20px;
+            text-align:center;
+            font-size:24px;
+        }
+
+        .container { padding:30px; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 { margin: 0; }
+
+        .card p { color:#444; }
+
+        button {
+            margin-top: 10px;
+            padding:10px 20px;
+            background:#3498db;
+            border:none;
+            color:white;
+            border-radius:6px;
+            cursor:pointer;
+            font-weight: bold;
+        }
+
+        button:hover { background:#2980b9; }
+
+        .logout {
+            margin-top:25px;
+            text-align:right;
+        }
+
+        .logout button {
+            background:#e74c3c;
+        }
+
+        .logout button:hover {
+            background:#c0392b;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>Program Manager Dashboard</header>
+
+<div class="container">
+
+    <div class="grid">
+
+        <!-- ✅ 1. Beneficiaries -->
+        <div class="card">
+            <h2>👥 Review Beneficiaries</h2>
+            <p>Review beneficiary registrations and details.</p>
+            <button onclick="location.href='view_beneficiaries.jsp'">View Beneficiaries</button>
+        </div>
+
+        <!-- ✅ 2. Approve Aid -->
+        <div class="card">
+            <h2>✅ Approve / Reject Aid</h2>
+            <p>Approve or reject officer-submitted aid requests.</p>
+            <button onclick="location.href='approve_aid.jsp'">Approve Aid</button>
+        </div>
+
+        <!-- ✅ 3. Review Impact -->
+        <div class="card">
+            <h2>📌 Review Impact Reports</h2>
+            <p>Check post-aid impact updates & beneficiary progress.</p>
+            <button onclick="location.href='view_impact.jsp'">View Impact</button>
+        </div>
+
+        <!-- ✅ 4. Analytics -->
+        <div class="card">
+            <h2>📈 Analytics</h2>
+            <p>See NGO data insights and performance summary.</p>
+            <button onclick="location.href='../admin/analytics.html'">Analytics</button>
+        </div>
+
+    </div>
+
+    <div class="logout">
+        <button onclick="location.href='../../LogoutServlet'">Logout</button>
+    </div>
+
+</div>
+
+</body>
+</html>

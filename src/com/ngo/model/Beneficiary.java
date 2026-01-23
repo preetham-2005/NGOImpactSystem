@@ -9,79 +9,21 @@ public class Beneficiary {
     private double incomeBefore;
     private String email;
 
-    // ✅ Default Constructor
-    public Beneficiary() {}
+    public int getBeneficiaryId() { return beneficiaryId; }
+    public void setBeneficiaryId(int beneficiaryId) { this.beneficiaryId = beneficiaryId; }
 
-    // ✅ Parameterized Constructor
-    public Beneficiary(int beneficiaryId, String name, int regionId, int programId,
-                       double incomeBefore, String email) {
-        this.beneficiaryId = beneficiaryId;
-        this.name = name;
-        this.regionId = regionId;
-        this.programId = programId;
-        this.incomeBefore = incomeBefore;
-        this.email = email;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    // ✅ Getters and Setters
-    public int getBeneficiaryId() {
-        return beneficiaryId;
-    }
+    public int getRegionId() { return regionId; }
+    public void setRegionId(int regionId) { this.regionId = regionId; }
 
-    public void setBeneficiaryId(int beneficiaryId) {
-        this.beneficiaryId = beneficiaryId;
-    }
+    public int getProgramId() { return programId; }
+    public void setProgramId(int programId) { this.programId = programId; }
 
-    public String getName() {
-        return name;
-    }
+    public double getIncomeBefore() { return incomeBefore; }
+    public void setIncomeBefore(double incomeBefore) { this.incomeBefore = incomeBefore; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getRegionId() {
-        return regionId;
-    }
-
-    public void setRegionId(int regionId) {
-        this.regionId = regionId;
-    }
-
-    public int getProgramId() {
-        return programId;
-    }
-
-    public void setProgramId(int programId) {
-        this.programId = programId;
-    }
-
-    public double getIncomeBefore() {
-        return incomeBefore;
-    }
-
-    public void setIncomeBefore(double incomeBefore) {
-        this.incomeBefore = incomeBefore;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    // ✅ Optional toString()
-    @Override
-    public String toString() {
-        return "Beneficiary{" +
-                "beneficiaryId=" + beneficiaryId +
-                ", name='" + name + '\'' +
-                ", regionId=" + regionId +
-                ", programId=" + programId +
-                ", incomeBefore=" + incomeBefore +
-                ", email='" + email + '\'' +
-                '}';
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 }

@@ -41,7 +41,7 @@ public class EmailUtil {
             System.out.println("✅ Email sent successfully to: " + toEmail);
 
         } catch (Exception e) {
-            System.out.println("❌ Email sending failed");
+            System.out.println("Email sending failed");
             e.printStackTrace();
         }
     }

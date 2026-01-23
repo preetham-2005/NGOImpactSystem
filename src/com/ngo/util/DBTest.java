@@ -8,6 +8,6 @@ public class DBTest {
         if (con != null)
             System.out.println("✅ DB Connected Successfully");
         else
-            System.out.println("❌ DB Connection Failed");
+            System.out.println("DB Connection Failed");
     }
 }
