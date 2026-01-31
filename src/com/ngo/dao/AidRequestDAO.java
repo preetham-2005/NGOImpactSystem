@@ -12,8 +12,8 @@ public class AidRequestDAO {
         String sql = "SELECT * FROM aid_requests WHERE status='PENDING'";
 
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 AidRequest ar = new AidRequest();
@@ -21,13 +21,13 @@ public class AidRequestDAO {
                 ar.setBeneficiaryId(rs.getInt("beneficiary_id"));
                 ar.setAidType(rs.getString("aid_type"));
                 ar.setAmount(rs.getDouble("amount"));
-                ar.setDate(rs.getDate("request_date"));
+                ar.setRequestDate(rs.getDate("request_date"));
                 ar.setRequestedBy(rs.getString("requested_by"));
                 ar.setStatus(rs.getString("status"));
                 list.add(ar);
             }
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -38,14 +38,14 @@ public class AidRequestDAO {
         String sql = "UPDATE aid_requests SET status=? WHERE request_id=?";
 
         try (Connection con = DBConnection.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+                PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, status);
             ps.setInt(2, requestId);
 
             return ps.executeUpdate() > 0;
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

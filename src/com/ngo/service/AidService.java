@@ -37,11 +37,14 @@ public class AidService {
 
                 String body = "Hello,\n\n"
                         + "Your aid request has been APPROVED and the aid has been distributed.\n\n"
-                        + "Amount: ₹" + amount + "\n"
+                        + "Amount: ₹" + String.format("%.2f", amount) + "\n"
                         + "Status: APPROVED\n\n"
                         + "Thank you.\nNGO Impact System";
 
                 EmailUtil.sendEmail(email, subject, body);
+            } else {
+                System.out.println(
+                        "[WARN] No valid email found for beneficiary " + beneficiaryId + " in request " + requestId);
             }
         }
     }

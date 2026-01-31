@@ -13,6 +13,7 @@ import com.ngo.service.AidService;
 import com.ngo.service.BeneficiaryService;
 import com.ngo.util.EmailUtil;
 import com.ngo.util.RedirectUtil;
+
 @WebServlet("/DistributeAidServlet")
 public class DistributeAidServlet extends HttpServlet {
 
@@ -27,7 +28,8 @@ public class DistributeAidServlet extends HttpServlet {
         }
 
         String requestedBy = (String) session.getAttribute("username");
-        if (requestedBy == null) requestedBy = "officer1";
+        if (requestedBy == null)
+            requestedBy = "officer1";
 
         int beneficiaryId = Integer.parseInt(req.getParameter("beneficiary_id"));
         String aidType = req.getParameter("aid_type");
@@ -42,11 +44,13 @@ public class DistributeAidServlet extends HttpServlet {
             String msg = "Hello,\n\n" +
                     "A new aid request has been submitted and is pending approval.\n\n" +
                     "Aid Type: " + aidType +
-                    "\nAmount: " + amount +
+                    "\nAmount: ₹" + String.format("%.2f", amount) +
                     "\nStatus: PENDING\n\n" +
                     "Thank you.\nNGO Impact System";
 
             EmailUtil.sendEmail(email, "Aid Request Submitted", msg);
+        } else {
+            System.out.println("[WARN] No valid email found for beneficiary " + beneficiaryId);
         }
 
         RedirectUtil.redirect(req, res,
