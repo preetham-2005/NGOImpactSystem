@@ -1,10 +1,11 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Add Beneficiary - NGO Impact System</title>
 
-    <!-- ✅ Prevent back after logout -->
+    <!-- Prevent back after logout -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -32,14 +33,9 @@
             font-size: 14px;
         }
 
-        .logout a:hover {
-            background: #c0392b;
-        }
+        .logout a:hover { background: #c0392b; }
 
-        h2 {
-            color: #2c3e50;
-            margin: 0;
-        }
+        h2 { color: #2c3e50; margin: 0; }
 
         .form-box {
             background: white;
@@ -74,13 +70,9 @@
             font-size: 15px;
         }
 
-        button:hover {
-            background-color: #2980b9;
-        }
+        button:hover { background-color: #2980b9; }
 
-        .back {
-            margin-top: 15px;
-        }
+        .back { margin-top: 15px; }
 
         .back a {
             text-decoration: none;
@@ -95,16 +87,16 @@
 <div class="topbar">
     <h2>➕ Add Beneficiary</h2>
 
-    <!-- ✅ logout (works from any officer page) -->
     <div class="logout">
-        <a href="../../LogoutServlet" onclick="return confirm('Do you want to logout?')">Logout</a>
+        <a href="<%=request.getContextPath()%>/LogoutServlet"
+           onclick="return confirm('Do you want to logout?')">Logout</a>
     </div>
 </div>
 
 <div class="form-box">
 
-    <!-- ✅ Correct action matches web.xml -->
-    <form action="../../AddBeneficiaryServlet" method="post">
+    <!-- FORM SUBMITS TO SERVLET -->
+    <form action="<%=request.getContextPath()%>/AddBeneficiaryServlet" method="post">
 
         <label>Beneficiary Name</label>
         <input type="text" name="name" required>
@@ -139,7 +131,7 @@
 </div>
 
 <div class="back">
-    <a href="officer_dashboard.html">⬅ Back to Dashboard</a>
+    <a href="<%=request.getContextPath()%>/pages/officers/officer_dashboard.jsp">⬅ Back to Dashboard</a>
 </div>
 
 </body>

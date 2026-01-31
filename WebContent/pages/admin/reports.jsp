@@ -1,259 +1,168 @@
-<%@ page import="java.sql.*" %>
-<%@ page import="com.ngo.util.DBConnection" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page import="java.sql.*, java.util.*, com.ngo.util.DBConnection" %>
 
 <%
-    // ✅ Session check (Admin only)
-    String role = (String) session.getAttribute("role");
-    if (role == null || !role.equals("ADMIN")) {
-        response.sendRedirect("../../login.html");
-        return;
-    }
+String role = (String) session.getAttribute("role");
+if (role == null || !role.equals("ADMIN")) {
+    response.sendRedirect("../../login.html");
+    return;
+}
 
-    int totalBeneficiaries = 0;
-    int totalAided = 0;
-    int improvedCount = 0;
-    double impactPercent = 0.0;
+int totalBeneficiaries=0,totalAided=0,improvedCount=0;
+double impactPercent=0;
 
-    Connection con = null;
-    PreparedStatement ps = null;
-    ResultSet rs = null;
+Map<String,Integer> programSuccess=new LinkedHashMap<>();
+Map<String,Double> programEffectiveness=new LinkedHashMap<>();
+Map<String,Double> incomeTrend=new LinkedHashMap<>();
+int struggling=0,stable=0,approved=0,pending=0,rejected=0;
 
-    try {
-        con = DBConnection.getConnection();
+try(Connection con=DBConnection.getConnection()){
+PreparedStatement ps; ResultSet rs;
 
-        // ✅ 1) Total Beneficiaries
-        ps = con.prepareStatement("SELECT COUNT(*) FROM beneficiaries");
-        rs = ps.executeQuery();
-        if (rs.next()) totalBeneficiaries = rs.getInt(1);
-        rs.close(); ps.close();
+// TOTALS
+ps=con.prepareStatement("SELECT COUNT(*) FROM beneficiaries");
+rs=ps.executeQuery(); if(rs.next()) totalBeneficiaries=rs.getInt(1);
+rs.close(); ps.close();
 
-        // ✅ 2) Total Beneficiaries Aided
-        ps = con.prepareStatement("SELECT COUNT(*) FROM analytics_data WHERE amount > 0");
-        rs = ps.executeQuery();
-        if (rs.next()) totalAided = rs.getInt(1);
-        rs.close(); ps.close();
+ps=con.prepareStatement("SELECT COUNT(DISTINCT beneficiary_id) FROM aid_requests WHERE LOWER(status)='approved'");
+rs=ps.executeQuery(); if(rs.next()) totalAided=rs.getInt(1);
+rs.close(); ps.close();
 
-        // ✅ 3) Improved After Aid
-        ps = con.prepareStatement("SELECT COUNT(*) FROM analytics_data WHERE amount > 0 AND employed='Yes'");
-        rs = ps.executeQuery();
-        if (rs.next()) improvedCount = rs.getInt(1);
-        rs.close(); ps.close();
+ps=con.prepareStatement("SELECT COUNT(*) FROM post_aid_impact WHERE employed='YES'");
+rs=ps.executeQuery(); if(rs.next()) improvedCount=rs.getInt(1);
+rs.close(); ps.close();
 
-        // ✅ 4) Impact %
-        if (totalAided > 0) {
-            impactPercent = (improvedCount * 100.0) / totalAided;
-        }
+if(totalAided>0) impactPercent=(improvedCount*100.0)/totalAided;
 
-    } catch (Exception e) {
-        e.printStackTrace();
-    } finally {
-        try { if (rs != null) rs.close(); } catch(Exception ex) {}
-        try { if (ps != null) ps.close(); } catch(Exception ex) {}
-        try { if (con != null) con.close(); } catch(Exception ex) {}
-    }
+// PROGRAM SUCCESS
+ps=con.prepareStatement(
+"SELECT p.program_name, COUNT(pa.impact_id) " +
+"FROM post_aid_impact pa JOIN beneficiaries b ON pa.beneficiary_id=b.beneficiary_id " +
+"JOIN programs p ON b.program_id=p.program_id WHERE pa.employed='YES' GROUP BY p.program_name");
+rs=ps.executeQuery();
+while(rs.next()) programSuccess.put(rs.getString(1), rs.getInt(2));
+rs.close(); ps.close();
+
+// PROGRAM EFFECTIVENESS %
+ps=con.prepareStatement(
+"SELECT p.program_name, ROUND(SUM(CASE WHEN pa.employed='YES' THEN 1 ELSE 0 END)*100.0/COUNT(pa.impact_id),2) " +
+"FROM post_aid_impact pa JOIN beneficiaries b ON pa.beneficiary_id=b.beneficiary_id " +
+"JOIN programs p ON b.program_id=p.program_id GROUP BY p.program_name");
+rs=ps.executeQuery();
+while(rs.next()) programEffectiveness.put(rs.getString(1), rs.getDouble(2));
+rs.close(); ps.close();
+
+// STRUGGLE / STABLE
+ps=con.prepareStatement("SELECT COUNT(*) FROM post_aid_impact WHERE struggling='YES'");
+rs=ps.executeQuery(); if(rs.next()) struggling=rs.getInt(1);
+rs.close(); ps.close();
+
+ps=con.prepareStatement("SELECT COUNT(*) FROM post_aid_impact WHERE struggling='NO'");
+rs=ps.executeQuery(); if(rs.next()) stable=rs.getInt(1);
+rs.close(); ps.close();
+
+// AID STATUS
+ps=con.prepareStatement("SELECT status, COUNT(*) FROM aid_requests GROUP BY status");
+rs=ps.executeQuery();
+while(rs.next()){
+ String s=rs.getString(1).toLowerCase();
+ if(s.contains("approved")) approved=rs.getInt(2);
+ else if(s.contains("pending")) pending=rs.getInt(2);
+ else rejected=rs.getInt(2);
+}
+rs.close(); ps.close();
+
+// INCOME TREND (FIXED)
+ps = con.prepareStatement(
+"SELECT DATE_FORMAT(request_date,'%Y-%m') AS ym, " +
+"DATE_FORMAT(request_date,'%b-%Y') AS label, " +
+"AVG(amount) AS avg_amt " +
+"FROM aid_requests " +
+"WHERE request_date IS NOT NULL " +
+"GROUP BY ym, label " +
+"ORDER BY ym"
+);
+rs = ps.executeQuery();
+while(rs.next()){
+    incomeTrend.put(rs.getString("label"), rs.getDouble("avg_amt"));
+}
+rs.close();
+ps.close();
+}
 %>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Reports - NGO Impact System</title>
+<title>NGO Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
+<style>
+body{font-family:Poppins;background:#1e3c72;margin:0;padding:30px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:30px}
+.card{background:#2a5298;color:white;padding:20px;border-radius:14px;text-align:center}
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+.chart-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:25px}
+.chart-card{background:white;border-radius:14px;padding:15px;height:350px}
+.chart-card canvas{width:100%!important;height:100%!important}
+.full{grid-column:span 2;height:380px}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            padding: 20px;
-        }
-        h2 {
-            color: #2c3e50;
-        }
-        table {
-            width: 70%;
-            border-collapse: collapse;
-            background: white;
-            margin-bottom: 25px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: center;
-        }
-        th {
-            background-color: #3498db;
-            color: white;
-        }
-
-        /* ✅ Card Styling */
-        .card {
-            width: 70%;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-            margin-top: 20px;
-        }
-
-        /* ✅ Chart box for reducing size */
-        .chart-box {
-            width: 330px;
-            height: 330px;
-            margin: 0 auto;
-        }
-        .chart-box canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        a {
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-        }
-        .btn-back {
-            display: inline-block;
-            margin-top: 20px;
-        }
-    </style>
+.btn{padding:10px 15px;border:none;border-radius:8px;font-weight:bold;color:white;cursor:pointer}
+</style>
 </head>
 
 <body>
 
-<h2>📊 NGO Impact Reports</h2>
+<!-- BACK BUTTON -->
+<button onclick="history.back()" class="btn" style="background:#607d8b;">⬅ Back</button>
 
-<table>
-    <tr>
-        <th>Metric</th>
-        <th>Value</th>
-    </tr>
+<div class="cards">
+<div class="card"><h3>Total Beneficiaries</h3><h1><%=totalBeneficiaries%></h1></div>
+<div class="card"><h3>Beneficiaries Aided</h3><h1><%=totalAided%></h1></div>
+<div class="card"><h3>Improved After Aid</h3><h1><%=improvedCount%></h1></div>
+<div class="card"><h3>Impact %</h3><h1><%=String.format("%.2f",impactPercent)%>%</h1></div>
+</div>
 
-    <tr>
-        <td>Total Beneficiaries</td>
-        <td><%= totalBeneficiaries %></td>
-    </tr>
+<div class="chart-grid">
+<div class="chart-card"><canvas id="programChart"></canvas></div>
+<div class="chart-card"><canvas id="effectivenessChart"></canvas></div>
+<div class="chart-card"><canvas id="struggleChart"></canvas></div>
+<div class="chart-card"><canvas id="statusChart"></canvas></div>
+<div class="chart-card full"><canvas id="incomeChart"></canvas></div>
+</div>
 
-    <tr>
-        <td>Total Beneficiaries Aided</td>
-        <td><%= totalAided %></td>
-    </tr>
+<!-- BUTTONS -->
+<div style="text-align:center;margin-top:30px;">
+<form action="../../ExportDataServlet" method="get" style="display:inline;">
+<button class="btn" style="background:#4CAF50;">⬇ Download Excel</button>
+</form>
 
-    <tr>
-        <td>Improved After Aid</td>
-        <td><%= improvedCount %></td>
-    </tr>
-
-    <tr>
-        <td>Impact Percentage</td>
-        <td><%= String.format("%.2f", impactPercent) %> %</td>
-    </tr>
-</table>
-
-<div class="card">
-    <h3 style="text-align:center;">📈 Impact Visualization</h3>
-
-    <div class="chart-box">
-        <canvas id="impactChart"></canvas>
-    </div>
+<form action="../../SendReportServlet" method="post" style="display:inline;margin-left:10px;">
+<input type="hidden" name="totalBeneficiaries" value="<%=totalBeneficiaries%>">
+<input type="hidden" name="totalAided" value="<%=totalAided%>">
+<input type="hidden" name="improved" value="<%=improvedCount%>">
+<input type="hidden" name="impact" value="<%=String.format("%.2f",impactPercent)%>">
+<input type="email" name="email" placeholder="Enter Email" required style="padding:8px;border-radius:6px;border:none;">
+<button type="submit" class="btn" style="background:#ff5722;">📧 Email Report</button>
+</form>
 </div>
 
 <script>
-    const improved = Number("<%= improvedCount %>");
-    const aided = Number("<%= totalAided %>");
-    const notImproved = Math.max(aided - improved, 0);
+const programLabels=[<%=programSuccess.keySet().stream().map(k->"\""+k+"\"").reduce((a,b)->a+","+b).orElse("")%>];
+const programValues=[<%=programSuccess.values().stream().map(Object::toString).reduce((a,b)->a+","+b).orElse("")%>];
 
-    let activeText = ""; // ✅ will update on click
+const effLabels=[<%=programEffectiveness.keySet().stream().map(k->"\""+k+"\"").reduce((a,b)->a+","+b).orElse("")%>];
+const effValues=[<%=programEffectiveness.values().stream().map(Object::toString).reduce((a,b)->a+","+b).orElse("")%>];
 
-    // ✅ Center text plugin
-    const centerTextPlugin = {
-        id: "centerTextPlugin",
-        afterDraw(chart) {
-            const ctx = chart.ctx;
-            const meta = chart.getDatasetMeta(0);
-            if (!meta || !meta.data || !meta.data.length) return;
+const incomeLabels=[<%=incomeTrend.keySet().stream().map(k->"\""+k+"\"").reduce((a,b)->a+","+b).orElse("")%>];
+const incomeValues=[<%=incomeTrend.values().stream().map(Object::toString).reduce((a,b)->a+","+b).orElse("")%>];
 
-            const x = meta.data[0].x;
-            const y = meta.data[0].y;
-
-            ctx.save();
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillStyle = "#2c3e50";
-
-            const impactPercent = aided > 0 ? ((improved / aided) * 100).toFixed(1) : "0.0";
-            const text = activeText || `Impact\n${impactPercent}%`;
-            const lines = text.split("\n");
-
-            ctx.font = "bold 18px Arial";
-            ctx.fillText(lines[0], x, y - 12);
-
-            ctx.font = "bold 16px Arial";
-            ctx.fillText(lines[1], x, y + 12);
-
-            ctx.restore();
-        }
-    };
-
-    const chart = new Chart(document.getElementById("impactChart"), {
-        type: "doughnut",
-        data: {
-            labels: ["Improved", "Not Improved"],
-            datasets: [{
-                data: [improved, notImproved],
-                borderWidth: 3,
-                hoverOffset: 12
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: "65%",
-            plugins: {
-                legend: {
-                    position: "top",
-                    labels: { padding: 15 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(ctx) {
-                            const total = improved + notImproved;
-                            const val = ctx.raw;
-                            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                            return `${ctx.label}: ${val} (${pct}%)`;
-                        }
-                    }
-                }
-            },
-
-            // ✅ click slice => show value in center
-            onClick: (evt, elements) => {
-                if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const label = chart.data.labels[index];
-                    const val = chart.data.datasets[0].data[index];
-
-                    const total = improved + notImproved;
-                    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-
-                    activeText = `${label}\n${val} (${pct}%)`;
-                } else {
-                    activeText = ""; // reset
-                }
-                chart.update();
-            }
-        },
-        plugins: [centerTextPlugin]
-    });
+new Chart(programChart,{type:'bar',data:{labels:programLabels,datasets:[{label:'Success Count',data:programValues,backgroundColor:'#4caf50'}]},options:{responsive:true,maintainAspectRatio:false}});
+new Chart(effectivenessChart,{type:'bar',data:{labels:effLabels,datasets:[{label:'Effectiveness %',data:effValues,backgroundColor:'#00c853'}]},options:{responsive:true,maintainAspectRatio:false}});
+new Chart(struggleChart,{type:'doughnut',data:{labels:['Struggling','Stable'],datasets:[{data:[<%=struggling%>,<%=stable%>],backgroundColor:['#ff9800','#4caf50']}]},options:{responsive:true,maintainAspectRatio:false}});
+new Chart(statusChart,{type:'pie',data:{labels:['Approved','Pending','Rejected'],datasets:[{data:[<%=approved%>,<%=pending%>,<%=rejected%>],backgroundColor:['#4caf50','#ffc107','#f44336']}]},options:{responsive:true,maintainAspectRatio:false}});
+new Chart(incomeChart,{type:'line',data:{labels:incomeLabels,datasets:[{label:'Average Aid Amount',data:incomeValues,borderColor:'#673ab7',tension:0.3,fill:false}]},options:{responsive:true,maintainAspectRatio:false}});
 </script>
-
-<div class="btn-back">
-    <a href="admin_dashboard.html">⬅ Back to Dashboard</a>
-</div>
 
 </body>
 </html>

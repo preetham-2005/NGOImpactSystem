@@ -13,7 +13,6 @@ import com.ngo.service.AidService;
 import com.ngo.service.BeneficiaryService;
 import com.ngo.util.EmailUtil;
 import com.ngo.util.RedirectUtil;
-
 @WebServlet("/DistributeAidServlet")
 public class DistributeAidServlet extends HttpServlet {
 
@@ -27,24 +26,19 @@ public class DistributeAidServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Officer username from session (if you store it)
         String requestedBy = (String) session.getAttribute("username");
-        if (requestedBy == null) requestedBy = "officer1"; // fallback
+        if (requestedBy == null) requestedBy = "officer1";
 
         int beneficiaryId = Integer.parseInt(req.getParameter("beneficiary_id"));
         String aidType = req.getParameter("aid_type");
         double amount = Double.parseDouble(req.getParameter("amount"));
 
-        // ✅ Instead of distributing directly, create PENDING request
         new AidService().createAidRequest(beneficiaryId, aidType, amount, requestedBy);
 
-        // ✅ Fetch beneficiary email from DB
         BeneficiaryService bs = new BeneficiaryService();
         String email = bs.getBeneficiaryEmail(beneficiaryId);
 
-        // ✅ Inform beneficiary: Request raised (not distributed yet)
         if (email != null && !email.trim().isEmpty()) {
-
             String msg = "Hello,\n\n" +
                     "A new aid request has been submitted and is pending approval.\n\n" +
                     "Aid Type: " + aidType +
@@ -55,6 +49,7 @@ public class DistributeAidServlet extends HttpServlet {
             EmailUtil.sendEmail(email, "Aid Request Submitted", msg);
         }
 
-        RedirectUtil.redirect(req, res, "/pages/officers/officer_dashboard.html");
+        RedirectUtil.redirect(req, res,
+                "/pages/officers/officer_dashboard.jsp?msg=aid_requested");
     }
 }

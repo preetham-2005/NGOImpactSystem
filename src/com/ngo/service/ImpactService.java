@@ -6,9 +6,9 @@ public class ImpactService {
 
     private PostAidImpactDAO dao = new PostAidImpactDAO();
 
-    public void updateImpact(int beneficiaryId, double incomeAfter,
-                             String employed, String struggling) {
+    public boolean updateImpact(int beneficiaryId, double incomeAfter,
+                                String employed, String struggling) {
 
-        dao.updateImpact(beneficiaryId, incomeAfter, employed, struggling);
+        return dao.updateImpact(beneficiaryId, incomeAfter, employed, struggling);
     }
 }

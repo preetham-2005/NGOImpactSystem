@@ -1,10 +1,20 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    // 🔒 SESSION SECURITY
+    if (session == null || session.getAttribute("role") == null ||
+        !"OFFICER".equalsIgnoreCase((String) session.getAttribute("role"))) {
+        response.sendRedirect("../../login.html");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Post-Aid Impact - NGO Impact System</title>
 
-    <!-- ✅ Prevent back after logout -->
+    <!-- Prevent back after logout -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
@@ -87,6 +97,16 @@
             color: #3498db;
             font-weight: bold;
         }
+
+        .msg {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .success { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 
@@ -95,7 +115,6 @@
 <div class="topbar">
     <h2>📈 Post-Aid Impact Update</h2>
 
-    <!-- ✅ logout (works from any officer page) -->
     <div class="logout">
         <a href="../../LogoutServlet" onclick="return confirm('Do you want to logout?')">Logout</a>
     </div>
@@ -103,7 +122,20 @@
 
 <div class="form-box">
 
-    <!-- ✅ Correct action matches web.xml -->
+    <!-- ✅ SHOW RESULT MESSAGE -->
+    <%
+        String msg = request.getParameter("msg");
+        if ("success".equals(msg)) {
+    %>
+        <div class="msg success">Impact details updated successfully!</div>
+    <%
+        } else if ("fail".equals(msg)) {
+    %>
+        <div class="msg fail">Update failed. Please try again.</div>
+    <%
+        }
+    %>
+
     <form action="../../PostAidImpactServlet" method="post">
 
         <label>Beneficiary ID</label>
@@ -115,7 +147,6 @@
         <label>Employment Improved</label>
         <select name="employed" required>
             <option value="">-- Select --</option>
-            <!-- ✅ FIX: Use YES/NO -->
             <option value="YES">YES</option>
             <option value="NO">NO</option>
         </select>
@@ -123,7 +154,6 @@
         <label>Still Struggling?</label>
         <select name="struggling" required>
             <option value="">-- Select --</option>
-            <!-- ✅ FIX: Use YES/NO -->
             <option value="YES">YES</option>
             <option value="NO">NO</option>
         </select>
@@ -135,7 +165,7 @@
 </div>
 
 <div class="back">
-    <a href="officer_dashboard.html">⬅ Back to Dashboard</a>
+    <a href="officer_dashboard.jsp">⬅ Back to Dashboard</a>
 </div>
 
 </body>

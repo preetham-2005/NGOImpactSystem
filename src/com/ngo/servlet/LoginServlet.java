@@ -37,7 +37,7 @@ public class LoginServlet extends HttpServlet {
                 res.sendRedirect(req.getContextPath() + "/pages/admin/admin_dashboard.html");
             }
             else if ("OFFICER".equalsIgnoreCase(role)) {
-                res.sendRedirect(req.getContextPath() + "/pages/officers/officer_dashboard.html");
+                res.sendRedirect(req.getContextPath() + "/pages/officers/officer_dashboard.jsp");
             }
             else if ("MANAGER".equalsIgnoreCase(role)) {
                 res.sendRedirect(req.getContextPath() + "/pages/manager/manager_dashboard.html");

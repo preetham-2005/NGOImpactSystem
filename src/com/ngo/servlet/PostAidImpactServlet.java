@@ -17,8 +17,6 @@ import com.ngo.util.RedirectUtil;
 @WebServlet("/PostAidImpactServlet")
 public class PostAidImpactServlet extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
-
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
@@ -29,30 +27,43 @@ public class PostAidImpactServlet extends HttpServlet {
             return;
         }
 
-        int beneficiaryId = Integer.parseInt(req.getParameter("beneficiary_id"));
-        double incomeAfter = Double.parseDouble(req.getParameter("income_after"));
-        String employed = req.getParameter("employed");
-        String struggling = req.getParameter("struggling");
+        try {
+            int beneficiaryId = Integer.parseInt(req.getParameter("beneficiary_id"));
+            double incomeAfter = Double.parseDouble(req.getParameter("income_after"));
+            String employed = req.getParameter("employed");
+            String struggling = req.getParameter("struggling");
 
-        // ✅ Save impact in DB
-        new ImpactService().updateImpact(beneficiaryId, incomeAfter, employed, struggling);
+            // ✅ Save to DB
+            boolean status = new ImpactService()
+                    .updateImpact(beneficiaryId, incomeAfter, employed, struggling);
 
-        // ✅ Fetch email from DB
-        String email = new BeneficiaryService().getBeneficiaryEmail(beneficiaryId);
+            if (status) {
 
-        // ✅ Send email only if email exists
-        if (email != null && !email.trim().isEmpty()) {
+                String email = new BeneficiaryService().getBeneficiaryEmail(beneficiaryId);
 
-            String message =
-                    "Hello,\n\nYour post-aid impact has been updated successfully.\n\n" +
-                    "Income After Aid: " + incomeAfter +
-                    "\nEmployment Improved: " + employed +
-                    "\nStill Struggling: " + struggling +
-                    "\n\nThank you.\nNGO Impact System";
+                if (email != null && !email.trim().isEmpty()) {
+                    String message =
+                            "Hello,\n\nYour post-aid impact has been updated successfully.\n\n" +
+                            "Income After Aid: " + incomeAfter +
+                            "\nEmployment Improved: " + employed +
+                            "\nStill Struggling: " + struggling +
+                            "\n\nThank you.\nNGO Impact System";
 
-            EmailUtil.sendEmail(email, "Impact Updated", message);
+                    EmailUtil.sendEmail(email, "Impact Updated", message);
+                }
+
+                RedirectUtil.redirect(req, res,
+                        "/pages/officers/officer_dashboard.jsp?msg=impact_success");
+
+            } else {
+                RedirectUtil.redirect(req, res,
+                        "/pages/officers/post_impact.jsp?msg=fail");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            RedirectUtil.redirect(req, res,
+                    "/pages/officers/post_impact.jsp?msg=fail");
         }
-
-        RedirectUtil.redirect(req, res, "/pages/officers/officer_dashboard.html");
     }
 }

@@ -5,13 +5,16 @@ import com.ngo.util.DBConnection;
 
 public class PostAidImpactDAO {
 
-    public void updateImpact(int beneficiaryId, double incomeAfter,
-                             String employed, String struggling) {
+    public boolean updateImpact(int beneficiaryId, double incomeAfter,
+                                String employed, String struggling) {
+
+        boolean status = false;
 
         try (Connection con = DBConnection.getConnection()) {
-            String sql =
-                "INSERT INTO post_aid_impact(beneficiary_id,income_after,employed,struggling) " +
-                "VALUES(?,?,?,?)";
+
+            String sql = "INSERT INTO post_aid_impact " +
+                         "(beneficiary_id, income_after, employed, struggling) " +
+                         "VALUES (?, ?, ?, ?)";
 
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setInt(1, beneficiaryId);
@@ -19,9 +22,16 @@ public class PostAidImpactDAO {
             ps.setString(3, employed);
             ps.setString(4, struggling);
 
-            ps.executeUpdate();
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                status = true;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return status;
     }
 }

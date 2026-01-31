@@ -1,9 +1,11 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="com.ngo.util.DBConnection" %>
 
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Approve Aid Requests</title>
 
     <style>
@@ -85,7 +87,6 @@
     }
 %>
 
-<!-- ✅ COUNTS TOP -->
 <div class="summary">
     <div class="box pending">
         <h3>⏳ Pending</h3>
@@ -101,7 +102,6 @@
     </div>
 </div>
 
-<!-- ✅ PENDING TABLE -->
 <h3>⏳ Pending Requests</h3>
 <table>
 <tr>
@@ -116,7 +116,6 @@
 
 <%
     try(Connection con = DBConnection.getConnection()){
-
         String sql = "SELECT * FROM aid_requests WHERE status='PENDING' ORDER BY request_id DESC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
@@ -130,7 +129,6 @@
     <td><%= rs.getDouble("amount") %></td>
     <td><%= rs.getString("request_date") %></td>
     <td><%= rs.getString("requested_by") %></td>
-
     <td>
         <form action="../../ApproveAidServlet" method="post" style="display:inline;">
             <input type="hidden" name="request_id" value="<%= rs.getInt("request_id") %>">
@@ -147,13 +145,10 @@
 </tr>
 <%
         }
-    }catch(Exception e){
-        e.printStackTrace();
-    }
+    }catch(Exception e){ e.printStackTrace(); }
 %>
 </table>
 
-<!-- ✅ APPROVED TABLE -->
 <h3 style="margin-top:35px;">✅ Approved Requests History</h3>
 <table>
 <tr>
@@ -167,7 +162,6 @@
 
 <%
     try(Connection con = DBConnection.getConnection()){
-
         String sql = "SELECT * FROM aid_requests WHERE status='APPROVED' ORDER BY request_id DESC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
@@ -184,13 +178,10 @@
 </tr>
 <%
         }
-    }catch(Exception e){
-        e.printStackTrace();
-    }
+    }catch(Exception e){ e.printStackTrace(); }
 %>
 </table>
 
-<!-- ✅ REJECTED TABLE -->
 <h3 style="margin-top:35px;">❌ Rejected Requests History</h3>
 <table>
 <tr>
@@ -204,7 +195,6 @@
 
 <%
     try(Connection con = DBConnection.getConnection()){
-
         String sql = "SELECT * FROM aid_requests WHERE status='REJECTED' ORDER BY request_id DESC";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
@@ -221,9 +211,7 @@
 </tr>
 <%
         }
-    }catch(Exception e){
-        e.printStackTrace();
-    }
+    }catch(Exception e){ e.printStackTrace(); }
 %>
 </table>
 

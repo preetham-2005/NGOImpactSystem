@@ -1,9 +1,12 @@
 package com.ngo.servlet;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.gson.Gson;
+import com.ngo.dao.BeneficiaryDAO;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,69 +14,45 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import com.ngo.util.DBConnection;
-
 @WebServlet("/AnalyticsServlet")
 public class AnalyticsServlet extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        res.setContentType("application/json");
-        res.setCharacterEncoding("UTF-8");
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
 
-        StringBuilder json = new StringBuilder();
+        try {
+            BeneficiaryDAO dao = new BeneficiaryDAO();
 
-        int totalBeneficiaries = 0;
+            int totalBeneficiaries = dao.getTotalBeneficiaries();
+            double totalAid = dao.getTotalAidDistributed();
 
-        try (Connection con = DBConnection.getConnection()) {
+            Map<String, Integer> regionData = dao.getBeneficiaryCountByRegion();
+            Map<String, Integer> programData = dao.getBeneficiaryCountByProgram();
+            Map<String, Integer> impactData = dao.getEmploymentImpactStats();
 
-            // ✅ 1) Get total beneficiaries count from beneficiaries table
-            String countSql = "SELECT COUNT(*) AS total FROM beneficiaries";
-            try (PreparedStatement cps = con.prepareStatement(countSql);
-                 ResultSet crs = cps.executeQuery()) {
+            // 🔥 NEW — REAL REGION IMPROVEMENT %
+            Map<String, Double> regionImprovementPercent = dao.getRegionImprovementPercent();
 
-                if (crs.next()) {
-                    totalBeneficiaries = crs.getInt("total");
-                }
-            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("totalBeneficiaries", totalBeneficiaries);
+            result.put("totalAid", totalAid);
+            result.put("regionData", regionData);
+            result.put("programData", programData);
+            result.put("impactData", impactData);
 
-            // ✅ 2) Get analytics data
-            String sql = "SELECT beneficiary_id, name, aid_type, amount, income_after, employed FROM analytics_data";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            // 🔥 ADD THIS
+            result.put("regionImprovementPercent", regionImprovementPercent);
 
-            json.append("{");
-            json.append("\"totalBeneficiaries\":").append(totalBeneficiaries).append(",");
-            json.append("\"data\":[");
-
-            boolean first = true;
-
-            while (rs.next()) {
-                if (!first) json.append(",");
-                first = false;
-
-                json.append("{")
-                    .append("\"id\":").append(rs.getInt("beneficiary_id")).append(",")
-                    .append("\"name\":\"").append(rs.getString("name")).append("\",")
-                    .append("\"aid\":\"").append(rs.getString("aid_type")).append("\",")
-                    .append("\"amount\":").append(rs.getInt("amount")).append(",")
-                    .append("\"income\":").append(rs.getInt("income_after")).append(",")
-                    .append("\"employment\":\"").append(rs.getString("employed")).append("\"")
-                    .append("}");
-            }
-
-            json.append("]}");
+            Gson gson = new Gson();
+            out.print(gson.toJson(result));
 
         } catch (Exception e) {
             e.printStackTrace();
-
-            // ✅ return error response
-            json.setLength(0);
-            json.append("{\"error\":\"").append(e.getMessage()).append("\"}");
+            response.setStatus(500);
+            out.print("{\"error\":\"Analytics loading failed\"}");
         }
-
-        res.getWriter().print(json.toString());
     }
 }
