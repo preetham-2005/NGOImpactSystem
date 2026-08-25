@@ -6,101 +6,166 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Post Aid Impact Reports</title>
+<title>Post Aid Impact Reports - NGO Impact System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background: #f4f6f8;
-        margin:0;
-        padding:0;
+    :root {
+        --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --accent: #10b981;
+        --danger: #ef4444;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --card-bg: rgba(30, 41, 59, 0.7);
+        --card-border: rgba(255, 255, 255, 0.08);
     }
 
-    header{
-        background:#2c3e50;
-        color:white;
-        padding:18px;
-        text-align:center;
-        font-size:24px;
-        font-weight:bold;
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        background: var(--bg-gradient);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding-bottom: 50px;
     }
 
-    .container{
-        padding:25px;
-        max-width:1100px;
-        margin:auto;
+    /* Header */
+    header {
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--card-border);
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        font-family: "Outfit", sans-serif;
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
     }
 
-    .card{
-        background:white;
-        padding:20px;
-        border-radius:12px;
-        box-shadow:0 2px 10px rgba(0,0,0,0.12);
+    .container {
+        padding: 40px;
+        max-width: 1100px;
+        margin: auto;
     }
 
-    h2{
-        text-align:center;
-        margin:0 0 20px;
-        color:#2c3e50;
+    .card {
+        background: var(--card-bg);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
     }
 
-    table{
-        width:100%;
-        border-collapse:collapse;
-        margin-top:15px;
+    h2 {
+        font-family: "Outfit", sans-serif;
+        font-size: 22px;
+        font-weight: 600;
+        color: var(--text-main);
+        margin: 0 0 25px 0;
+        text-align: left;
     }
 
-    th{
-        background:#2c3e50;
-        color:white;
-        padding:12px;
-        font-size:15px;
-        text-align:center;
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 12px;
+        border: 1px solid var(--card-border);
     }
 
-    td{
-        padding:10px;
-        border:1px solid #ddd;
-        text-align:center;
-        font-size:14px;
-        background:#fff;
+    th {
+        background: rgba(15, 23, 42, 0.9);
+        color: var(--text-main);
+        padding: 16px;
+        font-family: "Outfit", sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-align: left;
+        border-bottom: 1px solid var(--card-border);
     }
 
-    tr:nth-child(even) td{
-        background:#f9f9f9;
+    td {
+        padding: 16px;
+        font-size: 14px;
+        color: var(--text-muted);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(30, 41, 59, 0.4);
     }
 
-    .badge{
-        padding:5px 10px;
-        border-radius:18px;
-        font-size:12px;
-        font-weight:bold;
-        display:inline-block;
+    tr:hover td {
+        background: rgba(30, 41, 59, 0.8);
+        color: white;
+        transition: background-color 0.2s ease;
     }
 
-    .yes{ background:#27ae60; color:white; }
-    .no{ background:#e74c3c; color:white; }
-
-    .btn{
-        margin-top:18px;
-        display:inline-block;
-        background:#3498db;
-        color:white;
-        padding:10px 16px;
-        border-radius:8px;
-        text-decoration:none;
-        font-weight:bold;
+    .badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+        text-align: center;
+        letter-spacing: 0.5px;
     }
 
-    .btn:hover{
-        background:#2980b9;
+    .yes {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--accent);
+        border: 1px solid rgba(16, 185, 129, 0.3);
     }
 
-    .empty-msg{
-        text-align:center;
-        padding:15px;
-        color:#555;
-        font-weight:bold;
+    .no {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--danger);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn {
+        margin-top: 25px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--primary);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .empty-msg {
+        text-align: center;
+        padding: 30px;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 15px;
+        background: rgba(30, 41, 59, 0.2) !important;
+    }
+
+    .beneficiary-name {
+        color: var(--text-main);
+        font-weight: 600;
     }
 </style>
 </head>
@@ -118,6 +183,7 @@
                 <tr>
                     <th>Impact ID</th>
                     <th>Beneficiary ID</th>
+                    <th>Beneficiary Name</th>
                     <th>Income After</th>
                     <th>Employed</th>
                     <th>Struggling</th>
@@ -133,8 +199,10 @@
                 try {
                     con = DBConnection.getConnection();
 
-                    String sql = "SELECT impact_id, beneficiary_id, income_after, employed, struggling " +
-                                 "FROM post_aid_impact ORDER BY impact_id DESC";
+                    String sql = "SELECT p.impact_id, p.beneficiary_id, b.name AS beneficiary_name, p.income_after, p.employed, p.struggling " +
+                                 "FROM post_aid_impact p " +
+                                 "LEFT JOIN beneficiaries b ON p.beneficiary_id = b.beneficiary_id " +
+                                 "ORDER BY p.impact_id DESC";
 
                     ps = con.prepareStatement(sql);
                     rs = ps.executeQuery();
@@ -146,20 +214,23 @@
 
                         String employed = rs.getString("employed");
                         String struggling = rs.getString("struggling");
+                        String name = rs.getString("beneficiary_name");
+                        if(name == null) name = "N/A";
             %>
                         <tr>
                             <td><%= rs.getInt("impact_id") %></td>
                             <td><%= rs.getInt("beneficiary_id") %></td>
-                            <td>₹ <%= rs.getDouble("income_after") %></td>
+                            <td class="beneficiary-name"><%= name %></td>
+                            <td>₹<%= String.format("%.2f", rs.getDouble("income_after")) %></td>
 
                             <td>
-                                <span class="badge <%= employed.equalsIgnoreCase("YES") ? "yes" : "no" %>">
+                                <span class="badge <%= "YES".equalsIgnoreCase(employed) ? "yes" : "no" %>">
                                     <%= employed %>
                                 </span>
                             </td>
 
                             <td>
-                                <span class="badge <%= struggling.equalsIgnoreCase("YES") ? "no" : "yes" %>">
+                                <span class="badge <%= "YES".equalsIgnoreCase(struggling) ? "no" : "yes" %>">
                                     <%= struggling %>
                                 </span>
                             </td>
@@ -170,13 +241,17 @@
                     if(!found){
             %>
                         <tr>
-                            <td colspan="5" class="empty-msg">⚠ No Post-Aid Impact Records Found</td>
+                            <td colspan="6" class="empty-msg">⚠ No Post-Aid Impact Records Found</td>
                         </tr>
             <%
                     }
 
                 } catch(Exception e){
-                    out.println("<tr><td colspan='5' class='empty-msg'>❌ Error: "+e.getMessage()+"</td></tr>");
+            %>
+                    <tr>
+                        <td colspan="6" class="empty-msg" style="color: var(--danger);">❌ Error: <%= e.getMessage() %></td>
+                    </tr>
+            <%
                     e.printStackTrace();
                 } finally {
                     try { if(rs!=null) rs.close(); } catch(Exception e){}
@@ -187,7 +262,10 @@
             </tbody>
         </table>
 
-        <a class="btn" href="manager_dashboard.html">⬅ Back</a>
+        <a class="btn" href="manager_dashboard.html">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+            Back to Dashboard
+        </a>
     </div>
 </div>
 

@@ -65,8 +65,46 @@ CREATE TABLE post_aid_impact (
     income_after DECIMAL(10,2),
     employed VARCHAR(10),
     struggling VARCHAR(10),
+    updated_by VARCHAR(50),
+    date DATE,
     FOREIGN KEY (beneficiary_id) REFERENCES beneficiaries(beneficiary_id)
         ON DELETE CASCADE
+);
+
+-- AID REQUESTS
+CREATE TABLE aid_requests (
+    request_id INT AUTO_INCREMENT PRIMARY KEY,
+    beneficiary_id INT NOT NULL,
+    aid_type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    request_date DATE,
+    approval_date DATE,
+    requested_by VARCHAR(50),
+    status VARCHAR(20) DEFAULT 'PENDING',
+    FOREIGN KEY (beneficiary_id) REFERENCES beneficiaries(beneficiary_id) ON DELETE CASCADE
+);
+
+-- ANALYTICS DATA
+CREATE TABLE analytics_data (
+    analytics_id INT AUTO_INCREMENT PRIMARY KEY,
+    beneficiary_id INT NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    aid_type VARCHAR(50) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    income_after DECIMAL(10,2) DEFAULT 0,
+    employed VARCHAR(10) DEFAULT 'NO',
+    FOREIGN KEY (beneficiary_id) REFERENCES beneficiaries(beneficiary_id) ON DELETE CASCADE
+);
+
+-- IMPACT REPORTS
+CREATE TABLE impact_reports (
+    report_id INT AUTO_INCREMENT PRIMARY KEY,
+    beneficiary_id INT NOT NULL,
+    income_after DECIMAL(10,2),
+    employed VARCHAR(20),
+    education VARCHAR(50),
+    report_date DATE,
+    FOREIGN KEY (beneficiary_id) REFERENCES beneficiaries(beneficiary_id) ON DELETE CASCADE
 );
 
 -- AUDIT LOGS
@@ -79,4 +117,5 @@ CREATE TABLE audit_logs (
 -- SAMPLE USERS
 INSERT INTO users (username, password, role, email) VALUES
 ('admin', 'admin123', 'ADMIN', 'admin@ngo.org'),
-('officer1', 'officer123', 'OFFICER', 'officer@ngo.org');
+('officer1', 'officer123', 'OFFICER', 'officer@ngo.org'),
+('manager1', 'manager123', 'MANAGER', 'manager@ngo.org');

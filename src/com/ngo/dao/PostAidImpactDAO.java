@@ -26,6 +26,15 @@ public class PostAidImpactDAO {
 
             if (rows > 0) {
                 status = true;
+                
+                // Synchronize denormalized analytics_data table with latest impact details
+                String updateAnalyticsSql = "UPDATE analytics_data SET income_after = ?, employed = ? WHERE beneficiary_id = ?";
+                try (PreparedStatement ps2 = con.prepareStatement(updateAnalyticsSql)) {
+                    ps2.setDouble(1, incomeAfter);
+                    ps2.setString(2, employed);
+                    ps2.setInt(3, beneficiaryId);
+                    ps2.executeUpdate();
+                }
             }
 
         } catch (Exception e) {

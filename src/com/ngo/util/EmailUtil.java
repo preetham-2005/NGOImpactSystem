@@ -17,15 +17,17 @@ public class EmailUtil {
     private static final String EMAIL_SERVICE = System.getenv("EMAIL_SERVICE") != null ? System.getenv("EMAIL_SERVICE")
             : "gmail";
 
-    // Email Configuration (read from environment or use defaults)
+    // Email Configuration (read from environment)
     private static final String fromEmail = System.getenv("EMAIL_FROM") != null ? System.getenv("EMAIL_FROM")
             : "noreply@ngo-system.com";
-    private static final String smtpUsername = System.getenv("SMTP_USERNAME") != null ? System.getenv("SMTP_USERNAME")
-            : "kpreethamkotagiri1@gmail.com";
-    private static final String smtpPassword = System.getenv("SMTP_PASSWORD") != null ? System.getenv("SMTP_PASSWORD")
-            : "nqrfjaojjunnyjtd";
+    private static final String smtpUsername = System.getenv("SMTP_USERNAME");
+    private static final String smtpPassword = System.getenv("SMTP_PASSWORD");
 
     private static Session getSession() {
+        if (smtpUsername == null || smtpUsername.trim().isEmpty() ||
+            smtpPassword == null || smtpPassword.trim().isEmpty()) {
+            throw new IllegalStateException("SMTP credentials (SMTP_USERNAME and SMTP_PASSWORD) are not configured in environment variables.");
+        }
         Properties props = new Properties();
 
         if ("mailtrap".equalsIgnoreCase(EMAIL_SERVICE)) {

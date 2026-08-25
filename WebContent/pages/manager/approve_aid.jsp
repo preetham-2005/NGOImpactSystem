@@ -3,61 +3,225 @@
 <%@ page import="java.sql.*" %>
 <%@ page import="com.ngo.util.DBConnection" %>
 
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Approve Aid Requests</title>
+    <title>Approve Aid Requests - NGO Impact System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body{font-family:Arial;background:#f5f5f5;padding:20px;}
-        h2{text-align:center;margin-bottom:20px;}
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+        }
 
-        .summary{
-            display:flex;
-            gap:15px;
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: "Inter", sans-serif;
+            margin: 0;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        h2 {
+            font-family: "Outfit", sans-serif;
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            margin: 40px 0 20px 0;
+            color: var(--text-main);
+        }
+
+        .summary {
+            display: flex;
+            gap: 20px;
             justify-content: center;
-            margin-bottom: 25px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
         }
 
-        .box{
-            background:white;
-            padding:15px 22px;
-            border-radius:10px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.1);
-            text-align:center;
-            min-width:200px;
+        .box {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            padding: 20px 30px;
+            border-radius: 14px;
+            text-align: center;
+            min-width: 220px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transition: transform 0.3s;
         }
 
-        .box h3{margin:0;font-size:16px;color:#333;}
-        .box p{margin:10px 0 0 0;font-size:24px;font-weight:bold;}
-
-        .pending p{color:#e67e22;}
-        .approved p{color:#27ae60;}
-        .rejected p{color:#e74c3c;}
-
-        table{width:100%;border-collapse:collapse;margin-top:15px;background:white;}
-        th,td{border:1px solid #ccc;padding:10px;text-align:center;}
-        th{background:#2c3e50;color:white;}
-
-        .btn{
-            padding:7px 12px;
-            border:none;
-            cursor:pointer;
-            border-radius:6px;
-            font-weight:bold;
+        .box:hover {
+            transform: translateY(-3px);
         }
-        .approve{background:#27ae60;color:white;}
-        .reject{background:#e74c3c;color:white;}
 
-        .back{
-            display:inline-block;
-            margin-top:20px;
-            text-decoration:none;
-            padding:10px 15px;
-            background:#3498db;
-            color:white;
-            border-radius:7px;
+        .box h3 {
+            margin: 0;
+            font-family: "Outfit", sans-serif;
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .box p {
+            margin: 10px 0 0 0;
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .pending p { color: var(--warning); }
+        .approved p { color: var(--accent); }
+        .rejected p { color: var(--danger); }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            margin-bottom: 40px;
+        }
+
+        h3.section-title {
+            font-family: "Outfit", sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 10px;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-main);
+            padding: 14px;
+            font-family: "Outfit", sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: left;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        td {
+            padding: 14px;
+            font-size: 14px;
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        tr:hover td {
+            background: rgba(30, 41, 59, 0.8);
+            color: white;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .approve {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .approve:hover {
+            background: var(--accent);
+            color: #0f172a;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .reject {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .reject:hover {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .beneficiary-name {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .no-data {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-style: italic;
         }
     </style>
 </head>
@@ -89,133 +253,212 @@
 
 <div class="summary">
     <div class="box pending">
-        <h3>⏳ Pending</h3>
+        <h3>⏳ Pending Requests</h3>
         <p><%= pendingCount %></p>
     </div>
     <div class="box approved">
-        <h3>✅ Approved</h3>
+        <h3>✅ Approved Requests</h3>
         <p><%= approvedCount %></p>
     </div>
     <div class="box rejected">
-        <h3>❌ Rejected</h3>
+        <h3>❌ Rejected Requests</h3>
         <p><%= rejectedCount %></p>
     </div>
 </div>
 
-<h3>⏳ Pending Requests</h3>
-<table>
-<tr>
-    <th>Request ID</th>
-    <th>Beneficiary ID</th>
-    <th>Aid Type</th>
-    <th>Amount</th>
-    <th>Date</th>
-    <th>Requested By</th>
-    <th>Action</th>
-</tr>
+<div class="container">
 
-<%
-    try(Connection con = DBConnection.getConnection()){
-        String sql = "SELECT * FROM aid_requests WHERE status='PENDING' ORDER BY request_id DESC";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+    <!-- 1. PENDING REQUESTS -->
+    <div class="section-card">
+        <h3 class="section-title" style="color: var(--warning);">⏳ Pending Requests</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Beneficiary ID</th>
+                    <th>Beneficiary Name</th>
+                    <th>Aid Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Requested By</th>
+                    <th style="width: 200px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                try(Connection con = DBConnection.getConnection()){
+                    String sql = "SELECT ar.request_id, ar.beneficiary_id, b.name AS beneficiary_name, ar.aid_type, ar.amount, ar.request_date, ar.requested_by " +
+                                 "FROM aid_requests ar " +
+                                 "LEFT JOIN beneficiaries b ON ar.beneficiary_id = b.beneficiary_id " +
+                                 "WHERE ar.status='PENDING' ORDER BY ar.request_id DESC";
+                    PreparedStatement ps = con.prepareStatement(sql);
+                    ResultSet rs = ps.executeQuery();
+                    boolean hasPending = false;
 
-        while(rs.next()){
-%>
-<tr>
-    <td><%= rs.getInt("request_id") %></td>
-    <td><%= rs.getInt("beneficiary_id") %></td>
-    <td><%= rs.getString("aid_type") %></td>
-    <td><%= rs.getDouble("amount") %></td>
-    <td><%= rs.getString("request_date") %></td>
-    <td><%= rs.getString("requested_by") %></td>
-    <td>
-        <form action="../../ApproveAidServlet" method="post" style="display:inline;">
-            <input type="hidden" name="request_id" value="<%= rs.getInt("request_id") %>">
-            <input type="hidden" name="action" value="APPROVE">
-            <button class="btn approve">Approve</button>
-        </form>
+                    while(rs.next()){
+                        hasPending = true;
+                        String name = rs.getString("beneficiary_name");
+                        if (name == null) name = "N/A";
+            %>
+            <tr>
+                <td><%= rs.getInt("request_id") %></td>
+                <td><%= rs.getInt("beneficiary_id") %></td>
+                <td class="beneficiary-name"><%= name %></td>
+                <td><%= rs.getString("aid_type") %></td>
+                <td>₹<%= String.format("%.2f", rs.getDouble("amount")) %></td>
+                <td><%= rs.getString("request_date") %></td>
+                <td><%= rs.getString("requested_by") %></td>
+                <td>
+                    <form action="../../ApproveAidServlet" method="post" style="display:inline;">
+                        <input type="hidden" name="request_id" value="<%= rs.getInt("request_id") %>">
+                        <input type="hidden" name="action" value="APPROVE">
+                        <button class="btn approve">Approve</button>
+                    </form>
 
-        <form action="../../ApproveAidServlet" method="post" style="display:inline;">
-            <input type="hidden" name="request_id" value="<%= rs.getInt("request_id") %>">
-            <input type="hidden" name="action" value="REJECT">
-            <button class="btn reject">Reject</button>
-        </form>
-    </td>
-</tr>
-<%
-        }
-    }catch(Exception e){ e.printStackTrace(); }
-%>
-</table>
+                    <form action="../../ApproveAidServlet" method="post" style="display:inline; margin-left: 5px;">
+                        <input type="hidden" name="request_id" value="<%= rs.getInt("request_id") %>">
+                        <input type="hidden" name="action" value="REJECT">
+                        <button class="btn reject">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            <%
+                    }
+                    if(!hasPending){
+            %>
+                <tr><td colspan="8" class="no-data">No pending aid requests.</td></tr>
+            <%
+                    }
+                }catch(Exception e){
+            %>
+                <tr><td colspan="8" class="no-data" style="color: var(--danger);">Error loading data: <%= e.getMessage() %></td></tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+    </div>
 
-<h3 style="margin-top:35px;">✅ Approved Requests History</h3>
-<table>
-<tr>
-    <th>Request ID</th>
-    <th>Beneficiary ID</th>
-    <th>Aid Type</th>
-    <th>Amount</th>
-    <th>Date</th>
-    <th>Requested By</th>
-</tr>
+    <!-- 2. APPROVED HISTORY -->
+    <div class="section-card">
+        <h3 class="section-title" style="color: var(--accent);">✅ Approved Requests History</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Beneficiary ID</th>
+                    <th>Beneficiary Name</th>
+                    <th>Aid Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Requested By</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                try(Connection con = DBConnection.getConnection()){
+                    String sql = "SELECT ar.request_id, ar.beneficiary_id, b.name AS beneficiary_name, ar.aid_type, ar.amount, ar.request_date, ar.requested_by " +
+                                 "FROM aid_requests ar " +
+                                 "LEFT JOIN beneficiaries b ON ar.beneficiary_id = b.beneficiary_id " +
+                                 "WHERE ar.status='APPROVED' ORDER BY ar.request_id DESC";
+                    PreparedStatement ps = con.prepareStatement(sql);
+                    ResultSet rs = ps.executeQuery();
+                    boolean hasApproved = false;
 
-<%
-    try(Connection con = DBConnection.getConnection()){
-        String sql = "SELECT * FROM aid_requests WHERE status='APPROVED' ORDER BY request_id DESC";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+                    while(rs.next()){
+                        hasApproved = true;
+                        String name = rs.getString("beneficiary_name");
+                        if (name == null) name = "N/A";
+            %>
+            <tr>
+                <td><%= rs.getInt("request_id") %></td>
+                <td><%= rs.getInt("beneficiary_id") %></td>
+                <td class="beneficiary-name"><%= name %></td>
+                <td><%= rs.getString("aid_type") %></td>
+                <td>₹<%= String.format("%.2f", rs.getDouble("amount")) %></td>
+                <td><%= rs.getString("request_date") %></td>
+                <td><%= rs.getString("requested_by") %></td>
+            </tr>
+            <%
+                    }
+                    if(!hasApproved){
+            %>
+                <tr><td colspan="7" class="no-data">No approved aid history.</td></tr>
+            <%
+                    }
+                }catch(Exception e){
+            %>
+                <tr><td colspan="7" class="no-data" style="color: var(--danger);">Error loading data: <%= e.getMessage() %></td></tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+    </div>
 
-        while(rs.next()){
-%>
-<tr>
-    <td><%= rs.getInt("request_id") %></td>
-    <td><%= rs.getInt("beneficiary_id") %></td>
-    <td><%= rs.getString("aid_type") %></td>
-    <td><%= rs.getDouble("amount") %></td>
-    <td><%= rs.getString("request_date") %></td>
-    <td><%= rs.getString("requested_by") %></td>
-</tr>
-<%
-        }
-    }catch(Exception e){ e.printStackTrace(); }
-%>
-</table>
+    <!-- 3. REJECTED HISTORY -->
+    <div class="section-card">
+        <h3 class="section-title" style="color: var(--danger);">❌ Rejected Requests History</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Request ID</th>
+                    <th>Beneficiary ID</th>
+                    <th>Beneficiary Name</th>
+                    <th>Aid Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Requested By</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                try(Connection con = DBConnection.getConnection()){
+                    String sql = "SELECT ar.request_id, ar.beneficiary_id, b.name AS beneficiary_name, ar.aid_type, ar.amount, ar.request_date, ar.requested_by " +
+                                 "FROM aid_requests ar " +
+                                 "LEFT JOIN beneficiaries b ON ar.beneficiary_id = b.beneficiary_id " +
+                                 "WHERE ar.status='REJECTED' ORDER BY ar.request_id DESC";
+                    PreparedStatement ps = con.prepareStatement(sql);
+                    ResultSet rs = ps.executeQuery();
+                    boolean hasRejected = false;
 
-<h3 style="margin-top:35px;">❌ Rejected Requests History</h3>
-<table>
-<tr>
-    <th>Request ID</th>
-    <th>Beneficiary ID</th>
-    <th>Aid Type</th>
-    <th>Amount</th>
-    <th>Date</th>
-    <th>Requested By</th>
-</tr>
+                    while(rs.next()){
+                        hasRejected = true;
+                        String name = rs.getString("beneficiary_name");
+                        if (name == null) name = "N/A";
+            %>
+            <tr>
+                <td><%= rs.getInt("request_id") %></td>
+                <td><%= rs.getInt("beneficiary_id") %></td>
+                <td class="beneficiary-name"><%= name %></td>
+                <td><%= rs.getString("aid_type") %></td>
+                <td>₹<%= String.format("%.2f", rs.getDouble("amount")) %></td>
+                <td><%= rs.getString("request_date") %></td>
+                <td><%= rs.getString("requested_by") %></td>
+            </tr>
+            <%
+                    }
+                    if(!hasRejected){
+            %>
+                <tr><td colspan="7" class="no-data">No rejected aid history.</td></tr>
+            <%
+                    }
+                }catch(Exception e){
+            %>
+                <tr><td colspan="7" class="no-data" style="color: var(--danger);">Error loading data: <%= e.getMessage() %></td></tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+    </div>
 
-<%
-    try(Connection con = DBConnection.getConnection()){
-        String sql = "SELECT * FROM aid_requests WHERE status='REJECTED' ORDER BY request_id DESC";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
+    <a class="back" href="manager_dashboard.html">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        Back to Dashboard
+    </a>
 
-        while(rs.next()){
-%>
-<tr>
-    <td><%= rs.getInt("request_id") %></td>
-    <td><%= rs.getInt("beneficiary_id") %></td>
-    <td><%= rs.getString("aid_type") %></td>
-    <td><%= rs.getDouble("amount") %></td>
-    <td><%= rs.getString("request_date") %></td>
-    <td><%= rs.getString("requested_by") %></td>
-</tr>
-<%
-        }
-    }catch(Exception e){ e.printStackTrace(); }
-%>
-</table>
-
-<a class="back" href="manager_dashboard.html">⬅ Back</a>
+</div>
 
 </body>
 </html>

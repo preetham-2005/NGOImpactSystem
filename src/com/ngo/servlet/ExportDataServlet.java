@@ -84,15 +84,15 @@ public class ExportDataServlet extends HttpServlet {
     }
 
     private void exportAidRequests(PrintWriter out) throws Exception {
-        out.println("Aid ID,Beneficiary ID,Aid Type,Amount,Status,Request Date,Approval Date");
+        out.println("Request ID,Beneficiary ID,Aid Type,Amount,Status,Request Date,Approval Date");
 
         try (Connection con = DBConnection.getConnection()) {
-            String sql = "SELECT aid_id, beneficiary_id, aid_type, amount, status, request_date, approval_date FROM aid_requests";
+            String sql = "SELECT request_id, beneficiary_id, aid_type, amount, status, request_date, approval_date FROM aid_requests";
             try (PreparedStatement ps = con.prepareStatement(sql);
                     ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    out.println(rs.getInt("aid_id") + "," +
+                    out.println(rs.getInt("request_id") + "," +
                             rs.getInt("beneficiary_id") + "," +
                             rs.getString("aid_type") + "," +
                             rs.getDouble("amount") + "," +
@@ -105,20 +105,21 @@ public class ExportDataServlet extends HttpServlet {
     }
 
     private void exportImpactReports(PrintWriter out) throws Exception {
-        out.println("Report ID,Beneficiary ID,Income After,Employment Status,Education Level,Report Date");
+        out.println("Impact ID,Beneficiary ID,Income After,Employed,Struggling,Updated By,Date");
 
         try (Connection con = DBConnection.getConnection()) {
-            String sql = "SELECT report_id, beneficiary_id, income_after, employed, education, report_date FROM impact_reports";
+            String sql = "SELECT impact_id, beneficiary_id, income_after, employed, struggling, updated_by, date FROM post_aid_impact";
             try (PreparedStatement ps = con.prepareStatement(sql);
                     ResultSet rs = ps.executeQuery()) {
 
                 while (rs.next()) {
-                    out.println(rs.getInt("report_id") + "," +
+                    out.println(rs.getInt("impact_id") + "," +
                             rs.getInt("beneficiary_id") + "," +
                             rs.getDouble("income_after") + "," +
                             rs.getString("employed") + "," +
-                            rs.getString("education") + "," +
-                            rs.getString("report_date"));
+                            rs.getString("struggling") + "," +
+                            rs.getString("updated_by") + "," +
+                            rs.getString("date"));
                 }
             }
         }
