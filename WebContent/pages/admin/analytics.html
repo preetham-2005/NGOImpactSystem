@@ -156,7 +156,7 @@ let charts=[];
 function destroyCharts(){ charts.forEach(c=>c.destroy()); charts=[]; }
 
 async function loadAnalytics(){
-const res=await fetch("/NGOImpactSystem/AnalyticsServlet");
+const res=await fetch("../../AnalyticsServlet");
 const data=await res.json();
 
 // BASIC METRICS

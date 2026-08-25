@@ -491,7 +491,7 @@
     <script>
         async function fetchManagerAnalytics() {
             try {
-                const response = await fetch('/NGOImpactSystem/AnalyticsServlet');
+                const response = await fetch('../../AnalyticsServlet');
                 const data = await response.json();
                 
                 // Set metrics
