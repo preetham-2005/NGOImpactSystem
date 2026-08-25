@@ -59,16 +59,17 @@ public class SessionFilter implements Filter {
         String role = (String) session.getAttribute("role");
 
         // Role-based path checks
-        if (relativePath.contains("/pages/admin/") || 
+        if (relativePath.equals("/pages/admin/analytics.html") || 
+            relativePath.equals("/AnalyticsServlet")) {
+            if (!"ADMIN".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(role)) {
+                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Admin or Manager role required.");
+                return;
+            }
+        }
+        else if (relativePath.contains("/pages/admin/") || 
             relativePath.equals("/ExportDataServlet")) {
             if (!"ADMIN".equalsIgnoreCase(role)) {
                 res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Admin role required.");
-                return;
-            }
-        } 
-        else if (relativePath.equals("/AnalyticsServlet")) {
-            if (!"ADMIN".equalsIgnoreCase(role) && !"MANAGER".equalsIgnoreCase(role)) {
-                res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Admin or Manager role required.");
                 return;
             }
         }
