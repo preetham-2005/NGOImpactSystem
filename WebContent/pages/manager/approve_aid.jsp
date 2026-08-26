@@ -228,12 +228,35 @@
 
 <body>
 
-<h2>✅ Approve / Reject Aid Requests</h2>
+<h2>✅ Review & Approval Center</h2>
 
 <%
+    String msg = request.getParameter("msg");
+    if("updated".equals(msg)){
+%>
+    <div style="max-width: 1200px; margin: 0 auto 20px auto; padding: 14px 20px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; color: #10b981; text-align: center; font-weight: 600;">
+        ✅ Aid distribution request status updated successfully!
+    </div>
+<%
+    } else if("beneficiary_updated".equals(msg)){
+%>
+    <div style="max-width: 1200px; margin: 0 auto 20px auto; padding: 14px 20px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 12px; color: #10b981; text-align: center; font-weight: 600;">
+        👥 Beneficiary registration profile status updated successfully!
+    </div>
+<%
+    }
+
+    int pendingBeneficiaries = 0;
     int pendingCount = 0, approvedCount = 0, rejectedCount = 0;
 
     try(Connection con = DBConnection.getConnection()){
+        // Count pending beneficiaries
+        PreparedStatement bps = con.prepareStatement("SELECT COUNT(*) FROM beneficiaries WHERE status='PENDING'");
+        ResultSet brs = bps.executeQuery();
+        if(brs.next()) pendingBeneficiaries = brs.getInt(1);
+        brs.close(); bps.close();
+
+        // Count aid requests
         String countSql = "SELECT status, COUNT(*) as total FROM aid_requests GROUP BY status";
         PreparedStatement cps = con.prepareStatement(countSql);
         ResultSet crs = cps.executeQuery();
@@ -246,6 +269,7 @@
             if("APPROVED".equalsIgnoreCase(st)) approvedCount = total;
             if("REJECTED".equalsIgnoreCase(st)) rejectedCount = total;
         }
+        crs.close(); cps.close();
     }catch(Exception e){
         e.printStackTrace();
     }
@@ -253,24 +277,96 @@
 
 <div class="summary">
     <div class="box pending">
-        <h3>⏳ Pending Requests</h3>
+        <h3>👥 Pending Beneficiaries</h3>
+        <p><%= pendingBeneficiaries %></p>
+    </div>
+    <div class="box pending">
+        <h3>💸 Pending Aid Requests</h3>
         <p><%= pendingCount %></p>
     </div>
     <div class="box approved">
-        <h3>✅ Approved Requests</h3>
+        <h3>✅ Approved Aid</h3>
         <p><%= approvedCount %></p>
     </div>
     <div class="box rejected">
-        <h3>❌ Rejected Requests</h3>
+        <h3>❌ Rejected Aid</h3>
         <p><%= rejectedCount %></p>
     </div>
 </div>
 
 <div class="container">
 
-    <!-- 1. PENDING REQUESTS -->
+    <!-- 1. PENDING BENEFICIARIES APPROVAL -->
     <div class="section-card">
-        <h3 class="section-title" style="color: var(--warning);">⏳ Pending Requests</h3>
+        <h3 class="section-title" style="color: #38bdf8;">👥 Pending Beneficiary Registrations</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Region</th>
+                    <th>Program</th>
+                    <th>Income Before</th>
+                    <th>Email</th>
+                    <th style="width: 200px;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                try(Connection con = DBConnection.getConnection()){
+                    String bsql = "SELECT b.beneficiary_id, b.name, r.region_name, p.program_name, b.income_before, b.email " +
+                                  "FROM beneficiaries b " +
+                                  "LEFT JOIN regions r ON b.region_id = r.region_id " +
+                                  "LEFT JOIN programs p ON b.program_id = p.program_id " +
+                                  "WHERE b.status='PENDING' ORDER BY b.beneficiary_id DESC";
+                    PreparedStatement bps = con.prepareStatement(bsql);
+                    ResultSet brs = bps.executeQuery();
+                    boolean hasPendingB = false;
+
+                    while(brs.next()){
+                        hasPendingB = true;
+            %>
+            <tr>
+                <td><%= brs.getInt("beneficiary_id") %></td>
+                <td class="beneficiary-name"><%= brs.getString("name") %></td>
+                <td><%= brs.getString("region_name") != null ? brs.getString("region_name") : "N/A" %></td>
+                <td><%= brs.getString("program_name") != null ? brs.getString("program_name") : "N/A" %></td>
+                <td>₹<%= String.format("%.2f", brs.getDouble("income_before")) %></td>
+                <td style="color: #6366f1;"><%= brs.getString("email") %></td>
+                <td>
+                    <form action="../../ApproveBeneficiaryServlet" method="post" style="display:inline;">
+                        <input type="hidden" name="beneficiary_id" value="<%= brs.getInt("beneficiary_id") %>">
+                        <input type="hidden" name="action" value="APPROVE">
+                        <button class="btn approve">Approve</button>
+                    </form>
+
+                    <form action="../../ApproveBeneficiaryServlet" method="post" style="display:inline; margin-left: 5px;">
+                        <input type="hidden" name="beneficiary_id" value="<%= brs.getInt("beneficiary_id") %>">
+                        <input type="hidden" name="action" value="REJECT">
+                        <button class="btn reject">Reject</button>
+                    </form>
+                </td>
+            </tr>
+            <%
+                    }
+                    if(!hasPendingB){
+            %>
+                <tr><td colspan="7" class="no-data">No pending beneficiary registrations.</td></tr>
+            <%
+                    }
+                }catch(Exception e){
+            %>
+                <tr><td colspan="7" class="no-data" style="color: var(--danger);">Error loading beneficiaries: <%= e.getMessage() %></td></tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 2. PENDING AID REQUESTS -->
+    <div class="section-card">
+        <h3 class="section-title" style="color: var(--warning);">💸 Pending Aid Distribution Requests</h3>
         <table>
             <thead>
                 <tr>

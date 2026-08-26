@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="java.sql.*, com.ngo.util.DBConnection" %>
 <%
     // 🔒 SESSION SECURITY
     if (session == null || session.getAttribute("role") == null ||
@@ -218,8 +219,28 @@
 
     <form action="../../PostAidImpactServlet" method="post">
 
-        <label>Beneficiary ID</label>
-        <input type="number" name="beneficiary_id" min="1" required placeholder="Enter beneficiary registration ID">
+        <label>Beneficiary</label>
+        <select name="beneficiary_id" required>
+            <option value="">-- Select Beneficiary --</option>
+            <%
+                try(Connection con = DBConnection.getConnection()){
+                    String bsql = "SELECT b.beneficiary_id, b.name, b.email, r.region_name, p.program_name " +
+                                 "FROM beneficiaries b " +
+                                 "LEFT JOIN regions r ON b.region_id = r.region_id " +
+                                 "LEFT JOIN programs p ON b.program_id = p.program_id " +
+                                 "ORDER BY b.beneficiary_id DESC";
+                    PreparedStatement bps = con.prepareStatement(bsql);
+                    ResultSet brs = bps.executeQuery();
+                    while(brs.next()){
+                        String prog = brs.getString("program_name") != null ? brs.getString("program_name") : "General";
+                        String reg = brs.getString("region_name") != null ? brs.getString("region_name") : "All";
+            %>
+            <option value="<%= brs.getInt("beneficiary_id") %>">#<%= brs.getInt("beneficiary_id") %> - <%= brs.getString("name") %> (<%= prog %> - <%= reg %>)</option>
+            <%
+                    }
+                }catch(Exception e){ e.printStackTrace(); }
+            %>
+        </select>
 
         <label>Income After Aid</label>
         <input type="number" name="income_after" step="0.01" min="0" required placeholder="Enter new household income">

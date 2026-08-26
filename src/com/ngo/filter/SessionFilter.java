@@ -12,6 +12,7 @@ import java.io.IOException;
     "/ExportDataServlet", 
     "/AnalyticsServlet", 
     "/ApproveAidServlet", 
+    "/ApproveBeneficiaryServlet",
     "/AddBeneficiaryServlet", 
     "/DistributeAidServlet", 
     "/PostAidImpactServlet"
@@ -74,7 +75,8 @@ public class SessionFilter implements Filter {
             }
         }
         else if (relativePath.contains("/pages/manager/") || 
-                 relativePath.equals("/ApproveAidServlet")) {
+                 relativePath.equals("/ApproveAidServlet") ||
+                 relativePath.equals("/ApproveBeneficiaryServlet")) {
             if (!"MANAGER".equalsIgnoreCase(role)) {
                 res.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Manager role required.");
                 return;

@@ -45,10 +45,10 @@ public class BeneficiaryDAO {
     // ================= ANALYTICS METHODS =================
 
     public Map<String, Integer> getBeneficiaryCountByRegion() {
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new LinkedHashMap<>();
         String sql = "SELECT r.region_name, COUNT(b.beneficiary_id) " +
-                     "FROM beneficiaries b JOIN regions r ON b.region_id = r.region_id " +
-                     "GROUP BY r.region_name";
+                     "FROM regions r LEFT JOIN beneficiaries b ON r.region_id = b.region_id " +
+                     "GROUP BY r.region_id, r.region_name ORDER BY r.region_id";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -61,10 +61,10 @@ public class BeneficiaryDAO {
     }
 
     public Map<String, Integer> getBeneficiaryCountByProgram() {
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new LinkedHashMap<>();
         String sql = "SELECT p.program_name, COUNT(b.beneficiary_id) " +
-                     "FROM beneficiaries b JOIN programs p ON b.program_id = p.program_id " +
-                     "GROUP BY p.program_name";
+                     "FROM programs p LEFT JOIN beneficiaries b ON p.program_id = b.program_id " +
+                     "GROUP BY p.program_id, p.program_name ORDER BY p.program_id";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
@@ -77,7 +77,7 @@ public class BeneficiaryDAO {
     }
 
     public double getTotalAidDistributed() {
-        String sql = "SELECT SUM(amount) FROM aid_requests WHERE LOWER(status)='approved'";
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM aid_requests WHERE LOWER(status)='approved'";
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -89,7 +89,7 @@ public class BeneficiaryDAO {
     }
 
     public Map<String, Integer> getEmploymentImpactStats() {
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new LinkedHashMap<>();
         String sql = "SELECT employed, COUNT(*) FROM post_aid_impact GROUP BY employed";
 
         try (Connection con = DBConnection.getConnection();
@@ -103,13 +103,13 @@ public class BeneficiaryDAO {
     }
 
     public Map<String, Double> getRegionImprovementPercent() {
-        Map<String, Double> map = new HashMap<>();
+        Map<String, Double> map = new LinkedHashMap<>();
         String sql = "SELECT r.region_name, " +
-                     "ROUND(SUM(CASE WHEN p.employed='YES' THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) " +
-                     "FROM post_aid_impact p " +
-                     "JOIN beneficiaries b ON p.beneficiary_id=b.beneficiary_id " +
-                     "JOIN regions r ON b.region_id=r.region_id " +
-                     "GROUP BY r.region_name";
+                     "COALESCE(ROUND(SUM(CASE WHEN p.employed='YES' THEN 1 ELSE 0 END) * 100.0 / NULLIF(COUNT(p.impact_id), 0), 2), 0.0) " +
+                     "FROM regions r " +
+                     "LEFT JOIN beneficiaries b ON r.region_id=b.region_id " +
+                     "LEFT JOIN post_aid_impact p ON b.beneficiary_id=p.beneficiary_id " +
+                     "GROUP BY r.region_id, r.region_name ORDER BY r.region_id";
 
         try (Connection con = DBConnection.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
